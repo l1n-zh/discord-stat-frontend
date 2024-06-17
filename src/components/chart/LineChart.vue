@@ -1,22 +1,25 @@
 <template>
     <div class="h-auto lg:w-[100vh] md:w-[90vw] w-[100vw] flex flex-col">
-        <canvas class="w-full h-full m-auto" ref="myChart" ></canvas>
+        <canvas class="w-full h-full m-auto" ref="myChart"></canvas>
         <v-range-slider step="1" v-model="sliderValue" class="px-[1em]"></v-range-slider>
+        <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨':''}`" class="ml-4"
+            :color="enableAnimation?'orange':''" hide-details inset></v-switch>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeMount,watch } from 'vue'
+import { ref, onMounted, onBeforeMount,watch, computed } from 'vue'
 import { Chart as ChartJS } from 'chart.js/auto';
 import { zhTW } from 'date-fns/locale';
 import 'chartjs-adapter-date-fns';
 
 
+let chart;
+let timeRange;
 const sliderValue = ref([0, 100])
 const myChart = ref(null);
-let chart;
 
-let timeRange;
+const enableAnimation = ref(false)
 
 onMounted(() => {
     const ctx = myChart.value.getContext('2d');
@@ -34,7 +37,25 @@ watch(sliderValue, () => {
     updateChartRange();
 })
 
+watch(enableAnimation, (value) => {
+    toggleAnimation(value);
+})
+
 const options = {
+    animation:false,
+    parsing:false,
+    interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+    },
+    plugins: {
+        decimation: {
+            enabled: false,
+            samples: 50,
+            algorithm: 'lttb',
+        },
+    },
     scales: {
         x: {
             type: 'time',
@@ -43,7 +64,6 @@ const options = {
             },
             ticks: {
                 source: 'auto',
-                // Disabled rotation for performance
                 maxRotation: 0,
                 autoSkip: true,
             }
@@ -78,6 +98,10 @@ function updateDatasetsTimeRange() {
     timeRange = [minTime, maxTime];
 }
 
+// function _addDataset(dataset) {
+//     if(datasets.data)
+// }
+
 function setDatasets(dataset) {
     chart.data.datasets = dataset
     chart.update()
@@ -87,6 +111,7 @@ function setDatasets(dataset) {
 
 function addDataset(dataset) {
     chart.data.datasets.push(dataset)
+    chart.update()
     updateDatasetsTimeRange();
     updateChartRange();
 }
@@ -101,6 +126,10 @@ function updateChartRange() {
     chart.options.scales.x.min = from + (unit * sliderValue.value[0]);
     chart.options.scales.x.max = from + (unit * sliderValue.value[1]);
     chart.update();
+}
+
+function toggleAnimation(value) {
+    chart.options.animation = value;
 }
 
 defineExpose({ addDataset,removeDataset, setDatasets })

@@ -13,4 +13,14 @@ function generate24HourArray() {
     return hoursArray;
 }
 
-export { generate24HourArray }
+
+function snowflakeToDate(snowflake) {
+    const dateBits = Number(BigInt.asUintN(64, snowflake) >> 22n);
+    return new Date(dateBits + 1420070400000);
+}
+
+function convertTimeZone(date, timeZone) {
+    return new Date(date.toLocaleString("en-US", { timeZone: timeZone }));
+}
+
+export { generate24HourArray,snowflakeToDate, convertTimeZone }

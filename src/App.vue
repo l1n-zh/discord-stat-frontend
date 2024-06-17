@@ -1,76 +1,44 @@
 <template>
-    <div class="flex flex-col items-center" v-if="loaded" >
-        <div class="">
-            <LineChart ref="lineChart"></LineChart>
-        </div>
-
-        <div class="lg:w-[60%] w-[90%]">
-            <Filter label="channel"
-                :items="externalData.channels"
-                :filter="ChannelIdFilter" :callback="filterInstance => channelIdFilterInstance = filterInstance">
-            </Filter>
-
-            <Filter label="user"
-                :items="externalData.users"
-                :filter="AuthorFilter" :callback="filterInstance => authorFilterInstance = filterInstance"></Filter>
-
-            <Filter label="time of day" :items="generate24HourArray()" :filter="TimeOfDayFilter"
-                :callback="filterInstance => timeOfDayFilterInstance = filterInstance"></Filter>
-
-            <v-btn @click="submit()" variant="tonal" append-icon="mdi-chart-timeline-variant-shimmer"
-                size="x-large">submit</v-btn>
+    <div v-if="loaded">
+        <LineChartPage :rawData="data" :externalData="externalData" v-if="isLineChart"></LineChartPage>
+        <PieChartPage :rawData="data" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
+        <div class="absolute right-10 bottom-10">
+            <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'" size="x-large" color="primary" @click="()=>{isLineChart = !isLineChart}"></v-btn>
         </div>
     </div>
+    <div v-if="!loaded" class="text-lg">Loading...</div>
 </template>
 
 <script setup>
-import LineChart from './components/chart/LineChart.vue'
-import Filter from './components/Filter.vue';
+import LineChartPage from './page/LineChartPage.vue'
+import PieChartPage from './page/PieChartPage.vue'
 import { ref, onMounted } from 'vue'
-import { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter } from './components/filter'
-import { generate24HourArray } from './utils.js'
-
-
-let channelIdFilterInstance, authorFilterInstance, timeOfDayFilterInstance; // TODO
+import { convertTimeZone, snowflakeToDate } from './utils'
 
 const loaded = ref(false)
-let rawData = []
-let externalData = []
 
-const lineChart = ref(null)
-
-function submit() {
-    lineChart.value.setDatasets([{
-        label: 'message count',
-        data: getData()
-    }])
-}
+let data = [], externalData;
+const isLineChart = ref(true);
 
 onMounted(async () => {
-    rawData = await fetch('/assets/data.json')
+    data = await fetch('/big_assets/data.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-    externalData = await fetch('/assets/external.json')
+
+    for (let [channelId, channelData] of Object.entries(data)) {
+        for (let message of channelData.messages) {
+            message.time = convertTimeZone(snowflakeToDate(message.id), "Asia/Taipei")
+            message.channelId = channelId
+        }
+    }
+
+    externalData = await fetch('/big_assets/external.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);
         });
     loaded.value = true;
 })
-
-function getData() {
-    let data = [];
-    let messageCount = 0;
-    for (let message of query(rawData, [channelIdFilterInstance], [authorFilterInstance, timeOfDayFilterInstance]).sort((a, b) => a.time - b.time)) {
-        ++messageCount;
-        data.push({
-            y: messageCount,
-            x: message.time,
-        })
-    }
-    return data;
-}
-
 </script>
