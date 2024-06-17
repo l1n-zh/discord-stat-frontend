@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col items-center">
-        <div class="lg:w-[80%] flex w-full">
-            <LineChart v-if="loaded" :data="data" label="test" ref="lineChart" class="w-full h-full"></LineChart>
+        <div class="">
+            <LineChart v-if="loaded" ref="lineChart"></LineChart>
         </div>
 
         <div class="lg:w-[60%] w-[90%]">
@@ -41,7 +41,7 @@ const lineChart = ref(null)
 
 function submit() {
     lineChart.value.setDatasets([{
-        label: 'test data',
+        label: 'message count',
         data: getData()
     }])
 }
