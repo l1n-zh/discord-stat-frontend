@@ -7,9 +7,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeMount, watch, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Chart as ChartJS } from 'chart.js/auto';
-import { zhTW } from 'date-fns/locale';
 import 'chartjs-adapter-date-fns';
 
 
@@ -30,7 +29,6 @@ onMounted(() => {
     chart.update();
 });
 
-
 watch(enableAnimation, (value) => {
     toggleAnimation(value);
 })
@@ -38,11 +36,6 @@ watch(enableAnimation, (value) => {
 const options = {
     animation: false,
 }
-
-
-// function _addDataset(dataset) {
-//     if(datasets.data)
-// }
 
 function setData(data) {
     chart.data = data

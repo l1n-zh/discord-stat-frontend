@@ -58,6 +58,10 @@ const { rawData, externalData } = defineProps(['rawData', 'externalData'])
 const chart = ref(null)
 const baseOn = ref(0)
 
+onMounted(() => {
+    submit()
+})
+
 function submit() {
     const [labels, data] = getData()
 
@@ -68,6 +72,7 @@ function submit() {
         }]
     })
 }
+
 
 function baseOnDayOfTime(messages) {
     let messageCounts = [];
@@ -111,7 +116,7 @@ function baseOnChannel(messages) {
 function sort(arr1, arr2) {
     const indices = Array.from(arr2.keys())
     indices.sort((a, b) => arr2[b] - arr2[a])
-    return[indices.map(i => arr1[i]),indices.map(i => arr2[i])]
+    return [indices.map(i => arr1[i]), indices.map(i => arr2[i])]
 }
 
 function getData() {

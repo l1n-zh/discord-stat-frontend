@@ -3,7 +3,7 @@
         <LineChartPage :rawData="data" :externalData="externalData" v-if="isLineChart"></LineChartPage>
         <PieChartPage :rawData="data" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
         <div class="absolute right-10 bottom-10">
-            <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'" size="x-large" color="primary" @click="()=>{isLineChart = !isLineChart}"></v-btn>
+            <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'" size="x-large" color="primary" @click="toggleChartType()"></v-btn>
         </div>
     </div>
     <div v-if="!loaded" class="text-lg">Loading...</div>
@@ -15,13 +15,14 @@ import PieChartPage from './page/PieChartPage.vue'
 import { ref, onMounted } from 'vue'
 import { convertTimeZone, snowflakeToDate } from './utils'
 
-const loaded = ref(false)
-
 let data = [], externalData;
+
+const loaded = ref(false)
 const isLineChart = ref(true);
+const toggleChartType = () => {isLineChart.value = !isLineChart.value}
 
 onMounted(async () => {
-    data = await fetch('/big_assets/data.json')
+    data = await fetch('/assets/data.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -34,7 +35,7 @@ onMounted(async () => {
         }
     }
 
-    externalData = await fetch('/big_assets/external.json')
+    externalData = await fetch('/assets/external.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);

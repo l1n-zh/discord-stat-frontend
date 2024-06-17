@@ -5,14 +5,12 @@
         </div>
 
         <div class="lg:w-[60%] w-[90%]">
-            <Filter label="channel"
-                :items="externalData.channels"
-                :filter="ChannelIdFilter" :callback="filterInstance => channelIdFilterInstance = filterInstance">
+            <Filter label="channel" :items="externalData.channels" :filter="ChannelIdFilter"
+                :callback="filterInstance => channelIdFilterInstance = filterInstance">
             </Filter>
 
-            <Filter label="user"
-                :items="externalData.users"
-                :filter="AuthorFilter" :callback="filterInstance => authorFilterInstance = filterInstance"></Filter>
+            <Filter label="user" :items="externalData.users" :filter="AuthorFilter"
+                :callback="filterInstance => authorFilterInstance = filterInstance"></Filter>
 
             <Filter label="time of day" :items="generate24HourArray()" :filter="TimeOfDayFilter"
                 :callback="filterInstance => timeOfDayFilterInstance = filterInstance"></Filter>
@@ -30,12 +28,14 @@ import { ref, onMounted } from 'vue'
 import { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter } from '@/components/filter'
 import { generate24HourArray } from '../utils.js'
 
-
+const { rawData, externalData } = defineProps(['rawData', 'externalData'])
+const chart = ref(null)
 let channelIdFilterInstance, authorFilterInstance, timeOfDayFilterInstance; // TODO
 
-const { rawData, externalData } = defineProps(['rawData', 'externalData'])
+onMounted(() => {
+    submit()
+})
 
-const chart = ref(null)
 
 function submit() {
     chart.value.setDatasets([{
