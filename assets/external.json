@@ -1,0 +1,19 @@
+{
+    "channels": [
+        { "title": "general", "subtitle": "", "value": "1250711874111148066" },
+        { "title": "測試", "subtitle": "", "value": "1251578118851006484" },
+        { "title": "測試2", "subtitle": "", "value": "1251578167869837344" }
+    ],
+    "users": [
+        {
+            "title": "__lin__",
+            "subtitle": "lzch.",
+            "value": "886902195776258099"
+        },
+        {
+            "title": "yun._.shiuan",
+            "subtitle": "yun._.shiuan",
+            "value": "634926663997718567"
+        }
+    ]
+}

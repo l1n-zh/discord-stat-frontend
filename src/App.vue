@@ -1,17 +1,17 @@
 <template>
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center" v-if="loaded" >
         <div class="">
-            <LineChart v-if="loaded" ref="lineChart"></LineChart>
+            <LineChart ref="lineChart"></LineChart>
         </div>
 
         <div class="lg:w-[60%] w-[90%]">
             <Filter label="channel"
-                :items="[{ 'title': 'general', 'subtitle': '', 'value': '1250711874111148066' }, { 'title': '測試', 'subtitle': '', 'value': '1251578118851006484' }, { 'title': '測試2', 'subtitle': '', 'value': '1251578167869837344' }]"
+                :items="externalData.channels"
                 :filter="ChannelIdFilter" :callback="filterInstance => channelIdFilterInstance = filterInstance">
             </Filter>
 
             <Filter label="user"
-                :items="[{ 'title': '__lin__', 'subtitle': 'lzch.', 'value': '886902195776258099' }, { 'title': 'yun._.shiuan', 'subtitle': 'yun._.shiuan', 'value': '634926663997718567' }]"
+                :items="externalData.users"
                 :filter="AuthorFilter" :callback="filterInstance => authorFilterInstance = filterInstance"></Filter>
 
             <Filter label="time of day" :items="generate24HourArray()" :filter="TimeOfDayFilter"
@@ -35,7 +35,7 @@ let channelIdFilterInstance, authorFilterInstance, timeOfDayFilterInstance; // T
 
 const loaded = ref(false)
 let rawData = []
-let data = [];
+let externalData = []
 
 const lineChart = ref(null)
 
@@ -47,7 +47,12 @@ function submit() {
 }
 
 onMounted(async () => {
-    rawData = await fetch('/src/assets/data.json')
+    rawData = await fetch('/assets/data.json')
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    externalData = await fetch('/assets/external.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);

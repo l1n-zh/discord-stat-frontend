@@ -5,6 +5,7 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
+    base: '/discord-stat-frontend/',
     server: {
         host: "0.0.0.0",
     },
