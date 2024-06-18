@@ -1,8 +1,7 @@
 <template>
-    <div class="flex items-center">
+    <div class="flex items-center flex-col lg:flex-row">
         <PieChart ref="chart"></PieChart>
-
-        <div class="lg:w-[60%] w-[90%]">
+        <div class="lg:w-[60%] w-[95%]">
             <Filter label="channel" :items="externalData.channels" :filter="ChannelIdFilter"
                 :callback="filterInstance => channelIdFilterInstance = filterInstance">
             </Filter>
@@ -14,7 +13,7 @@
                 :callback="filterInstance => timeOfDayFilterInstance = filterInstance"></Filter>
 
 
-            <v-btn-toggle v-model="baseOn" variant="outlined" divided>
+            <v-btn-toggle v-model="baseOn" variant="outlined" divided class="block w-full">
                 <v-btn :value="0">
                     <v-icon start>
                         mdi-forum
@@ -37,7 +36,7 @@
                 </v-btn>
             </v-btn-toggle>
 
-            <v-btn @click="submit()" variant="tonal" append-icon="mdi-chart-pie" class="float-right"
+            <v-btn @click="submit()" append-icon="mdi-chart-pie" color="secondary" class="float-right m-auto"
                 size="x-large">submit</v-btn>
         </div>
     </div>

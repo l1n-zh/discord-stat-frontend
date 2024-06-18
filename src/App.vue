@@ -3,7 +3,8 @@
         <LineChartPage :rawData="data" :externalData="externalData" v-if="isLineChart"></LineChartPage>
         <PieChartPage :rawData="data" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
         <div class="absolute right-10 bottom-10">
-            <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'" size="x-large" color="primary" @click="toggleChartType()"></v-btn>
+            <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'"
+                size="x-large" color="primary" @click="toggleChartType()"></v-btn>
         </div>
     </div>
     <div v-if="!loaded" class="text-lg">Loading...</div>

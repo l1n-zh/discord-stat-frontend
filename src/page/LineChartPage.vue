@@ -15,7 +15,7 @@
             <Filter label="time of day" :items="generate24HourArray()" :filter="TimeOfDayFilter"
                 :callback="filterInstance => timeOfDayFilterInstance = filterInstance"></Filter>
 
-            <v-btn @click="submit()" variant="tonal" append-icon="mdi-chart-timeline-variant-shimmer"
+            <v-btn @click="submit()" color="secondary" append-icon="mdi-chart-timeline-variant-shimmer"
                 size="x-large">submit</v-btn>
         </div>
     </div>
