@@ -80,7 +80,7 @@ function baseOnDayOfTime(messages) {
         const count = messages.filter(message => message.time.getHours() === hourData.value).length
         if (count > 0) {
             messageCounts.push(count)
-            labels.push(hourData.title)
+            labels.push(hourData.title + ' (' + hourData.subtitle + ')')
         }
     }
     return [labels, messageCounts];
@@ -93,7 +93,7 @@ function baseOnAuthor(messages) {
         const count = messages.filter(message => message.authorId === userData.value).length
         if (count > 0) {
             messageCounts.push(count)
-            labels.push(userData.title)
+            labels.push(userData.title + ' ( ' + userData.subtitle + ' )')
         }
     }
     return sort(labels, messageCounts);
