@@ -7,7 +7,7 @@
                 size="x-large" color="primary" @click="toggleChartType()"></v-btn>
         </div>
     </div>
-    <div v-if="!loaded" class="text-lg">Loading...</div>
+    <h1 v-if="!loaded" class="text-[5em]">Loading...</h1>
 </template>
 
 <script setup>
