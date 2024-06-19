@@ -14,7 +14,7 @@
 import LineChartPage from './page/LineChartPage.vue'
 import PieChartPage from './page/PieChartPage.vue'
 import { ref, onMounted } from 'vue'
-import { snowflakeToDate } from './utils'
+import { SnowflakeConverter } from './utils'
 
 let data = [], externalData;
 
@@ -29,9 +29,10 @@ onMounted(async () => {
             console.error('Error fetching data:', error);
         });
 
+    const snowflakeToDate = SnowflakeConverter("Asia/Taipei")
     for (let [channelId, channelData] of Object.entries(data)) {
         for (let message of channelData.messages) {
-            message.time = snowflakeToDate(message.id, "Asia/Taipei")
+            message.time = snowflakeToDate(message.id)
             message.channelId = channelId
         }
     }
