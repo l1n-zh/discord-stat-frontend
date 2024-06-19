@@ -55,6 +55,9 @@ const options = {
             samples: 50,
             algorithm: 'lttb',
         },
+        legend: {
+            display:false
+        },
     },
     scales: {
         x: {
