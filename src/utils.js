@@ -1,3 +1,6 @@
+import { toZonedTime } from "date-fns-tz";
+
+
 function generate24HourArray() {
     const hoursArray = [];
 
@@ -13,14 +16,10 @@ function generate24HourArray() {
     return hoursArray;
 }
 
-
-function snowflakeToDate(snowflake) {
+function snowflakeToDate(snowflake, timeZone) {
     const dateBits = Number(BigInt.asUintN(64, snowflake) >> 22n);
-    return new Date(dateBits + 1420070400000);
+    return toZonedTime(dateBits + 1420070400000, timeZone);
 }
 
-function convertTimeZone(date, timeZone) {
-    return new Date(date.toLocaleString("en-US", { timeZone: timeZone }));
-}
 
-export { generate24HourArray,snowflakeToDate, convertTimeZone }
+export { generate24HourArray, snowflakeToDate };

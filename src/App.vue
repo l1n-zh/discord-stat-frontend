@@ -14,7 +14,7 @@
 import LineChartPage from './page/LineChartPage.vue'
 import PieChartPage from './page/PieChartPage.vue'
 import { ref, onMounted } from 'vue'
-import { convertTimeZone, snowflakeToDate } from './utils'
+import { snowflakeToDate } from './utils'
 
 let data = [], externalData;
 
@@ -31,7 +31,7 @@ onMounted(async () => {
 
     for (let [channelId, channelData] of Object.entries(data)) {
         for (let message of channelData.messages) {
-            message.time = convertTimeZone(snowflakeToDate(message.id), "Asia/Taipei")
+            message.time = snowflakeToDate(message.id, "Asia/Taipei")
             message.channelId = channelId
         }
     }
