@@ -9,6 +9,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { Chart as ChartJS } from 'chart.js/auto';
+import { getChartLabelPlugin } from 'chart.js-plugin-labels-dv'
+ChartJS.register(getChartLabelPlugin())
 import 'chartjs-adapter-date-fns';
 
 
@@ -21,7 +23,7 @@ onMounted(() => {
     const ctx = myChart.value.getContext('2d');
     chart = new ChartJS(
         ctx, {
-        type: 'pie'
+            type: 'doughnut'
     });
 
     chart.data = { labels: [], datasets: [{ data: [] }] };
@@ -35,11 +37,22 @@ watch(enableAnimation, (value) => {
 
 const options = {
     animation: {
-        animateRotate:false,
-        animateScale:false
+        animateRotate: false,
+        animateScale: false
+    },
+        plugins: {
+            labels: {
+            precision: 2,
+            fontSize: 20,
+            fontColor: '#fff',
+            fontStyle: 'bold',
+            textShadow: true,
+            render: function (args) {
+                return args.percentage > 3 ? args.percentage + "%":''
+            }
+        }
     },
 }
-
 function setData(data) {
     chart.data = data
     chart.update()
