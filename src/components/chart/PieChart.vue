@@ -34,7 +34,10 @@ watch(enableAnimation, (value) => {
 })
 
 const options = {
-    animation: false,
+    animation: {
+        animateRotate:false,
+        animateScale:false
+    },
 }
 
 function setData(data) {
@@ -51,7 +54,8 @@ function removeData(label) {
 }
 
 function toggleAnimation(value) {
-    chart.options.animation = value;
+    chart.options.animation.animateRotate = value;
+    chart.options.animation.animateScale = value;
 }
 
 defineExpose({ addData, removeData, setData })
