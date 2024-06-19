@@ -42,16 +42,19 @@ const options = {
     },
         plugins: {
             labels: {
-            precision: 2,
-            fontSize: 20,
-            fontColor: '#fff',
-            fontStyle: 'bold',
-            textShadow: true,
-            render: function (args) {
-                return args.percentage > 3 ? args.percentage + "%":''
+                precision: 1,
+                fontSize: Math.min(window.innerHeight / 25, window.innerWidth/ 25),
+                fontColor: '#fff',
+                fontStyle: 'bold',
+                textShadow: true,
+                render: function (args) {
+                    return args.percentage > 4 ? args.percentage + "%":''
+                }
+            },
+            legend: {
+                maxHeight: Math.min(window.innerHeight /5, window.innerWidth / 5),
             }
-        }
-    },
+    }
 }
 function setData(data) {
     chart.data = data
