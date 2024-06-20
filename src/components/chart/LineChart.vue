@@ -1,7 +1,7 @@
 <template>
     <div class="h-auto lg:w-[100vh] md:w-[90vw] w-[100vw] flex flex-col">
         <canvas class="w-full h-full m-auto" ref="myChart"></canvas>
-        <v-range-slider step="1" v-model="sliderValue" class="px-[1em]" color="blue-grey-lighten-4"></v-range-slider>
+        <v-range-slider step="0.2" v-model="sliderValue" class="px-[1em]" color="blue-grey-lighten-4"></v-range-slider>
         <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨':''}`" class="ml-4"
             :color="enableAnimation?'orange':''" hide-details inset></v-switch>
     </div>
@@ -44,6 +44,7 @@ watch(enableAnimation, (value) => {
 const options = {
     animation:false,
     parsing:false,
+    normalized: true,
     interaction: {
         mode: 'nearest',
         axis: 'x',
@@ -51,8 +52,9 @@ const options = {
     },
     plugins: {
         decimation: {
-            enabled: false,
-            samples: 50,
+            enabled: true,
+            threshold: 100,
+            samples: 100,
             algorithm: 'lttb',
         },
         legend: {
