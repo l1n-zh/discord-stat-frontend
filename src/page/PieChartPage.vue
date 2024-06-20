@@ -53,8 +53,8 @@ const { messages, externalData } = defineProps(['messages', 'externalData'])
 
 const chart = ref(null)
 const baseOn = ref(0)
-let filters = []
-const addFilter = filter => filters.push(filter)
+let filters = {}
+const addFilter = filter => filters[filter.name] = filter
 
 onMounted(() => {
     submit()
@@ -119,7 +119,7 @@ function sort(arr1, arr2) {
 
 function getData() {
     const baseOnFunction = [baseOnChannel, baseOnAuthor, baseOnDayOfTime][baseOn.value]
-    return baseOnFunction(query(messages, filters))
+    return baseOnFunction(query(messages, Object.values(filters)))
 }
 
 </script>

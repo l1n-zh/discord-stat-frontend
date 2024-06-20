@@ -31,8 +31,8 @@ import { generate24HourArray } from '../utils.js'
 const { messages, externalData } = defineProps(['messages', 'externalData'])
 const chart = ref(null)
 
-let filters = []
-const addFilter = filter => filters.push(filter);
+let filters = {}
+const addFilter = filter => filters[filter.name] = filter;
 
 onMounted(() => {
     submit()
@@ -50,7 +50,7 @@ function submit() {
 function getData() {
     let data = [];
     let messageCount = 0;
-    for (let message of query(messages, filters).sort((a, b) => a.time - b.time)) {
+    for (let message of query(messages, Object.values(filters)).sort((a, b) => a.time - b.time)) {
         ++messageCount;
         data.push({
             y: messageCount,
