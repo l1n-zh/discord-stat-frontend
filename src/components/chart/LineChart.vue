@@ -114,17 +114,6 @@ function setDatasets(dataset) {
     updateChartRange();
 }
 
-function addDataset(dataset) {
-    chart.data.datasets.push(dataset)
-    chart.update()
-    updateDatasetsTimeRange();
-    updateChartRange();
-}
-
-function removeDataset(label) {
-    setDatasets(chart.data.datasets.filter( dataset => dataset.label !== label))
-}
-
 function updateChartRange() {
     const [from,to] = timeRange;
     const unit = (to - from) / 100
@@ -137,6 +126,6 @@ function toggleAnimation(value) {
     chart.options.animation = value;
 }
 
-defineExpose({ addDataset,removeDataset, setDatasets })
+defineExpose({ setDatasets })
 
 </script>
