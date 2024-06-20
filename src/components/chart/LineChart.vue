@@ -34,6 +34,7 @@ onMounted(() => {
 });
 
 watch(sliderValue, () => {
+    if (Math.abs(sliderValue.value[0] - sliderValue.value[1]) > 0.2)
     updateChartRange();
 })
 
