@@ -16,7 +16,7 @@ function generate24HourArray() {
 
 function snowflakeToDate(snowflake) {
     const dateBits = Number(BigInt.asUintN(64, snowflake) >> 22n);
-    return new Date(dateBits + 1420070400000);
+    return dateBits + 1420070400000;
 }
 
 export { generate24HourArray, snowflakeToDate };

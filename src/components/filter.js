@@ -12,6 +12,6 @@ function query(data, channelFilters, messageFilters) {
 
 const ChannelIdFilter = channelIds => channelId => !channelIds.length || channelIds.includes(channelId); // TODO
 const AuthorFilter = authorIds => message => !authorIds.length || authorIds.includes(message.authorId);
-const TimeOfDayFilter = timesOfDay => message => !timesOfDay.length || timesOfDay.includes(message.time.getHours());
+const TimeOfDayFilter = timesOfDay => message => !timesOfDay.length || timesOfDay.includes(new Date(message.time).getHours());
 
 export { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter };
