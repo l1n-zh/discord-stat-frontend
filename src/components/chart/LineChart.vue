@@ -5,7 +5,7 @@
         <div class="grid grid-cols-2">
             <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨' : ''}`" class="ml-4"
                 :color="enableAnimation ? 'orange' : ''" hide-details inset></v-switch>
-            <v-number-input class="" label="max labels count" v-model="maxLabelsCount" :min="1"
+            <v-number-input class="" label="TOP N" v-model="topN" :min="1"
                 variant="outlined"></v-number-input>
         </div>
     </div>
@@ -24,7 +24,7 @@ let chart;
 let timeRange;
 const sliderValue = ref([0, 100])
 const myChart = ref(null);
-const maxLabelsCount = ref(10)
+const topN = ref(10)
 
 const enableAnimation = ref(false)
 
@@ -45,7 +45,7 @@ watch(sliderValue, () => {
         updateChartRange();
 })
 
-watch(maxLabelsCount, () => {
+watch(topN, () => {
     chart.update()
 })
 
@@ -57,7 +57,7 @@ Interaction.modes.myCustomMode = function (chart, e, options, useFinalPosition) 
     const position = getRelativePosition(e, chart);
     const items = [];
     Interaction.evaluateInteractionItems(chart, 'x', position, (element, datasetIndex, index) => {
-        if (element.x <= position.x && datasetIndex < maxLabelsCount.value) {
+        if (element.x <= position.x) {
             items[datasetIndex] = { element, datasetIndex, index };
         }
     });
@@ -82,12 +82,7 @@ const options = {
             algorithm: 'lttb',
         },
         legend: {
-            position:'chartArea',
-            labels: {
-                filter: function (label) {
-                    return label.datasetIndex < maxLabelsCount.value;
-                }
-            }
+            position:'chartArea'
         },
     },
     scales: {
@@ -136,8 +131,8 @@ function updateDatasetsTimeRange() {
 //     if(datasets.data)
 // }
 
-function setDatasets(dataset) {
-    chart.data.datasets = dataset
+function setDatasets(datasets) {
+    chart.data.datasets = datasets.slice(0, topN.value);
     updateDatasetsTimeRange();
     updateChartRange();
 }
