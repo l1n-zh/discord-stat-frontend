@@ -1,23 +1,30 @@
 <template>
     <div class="h-auto lg:w-[100vh] md:w-[90vw] w-[100vw] flex flex-col">
         <canvas class="w-full h-full m-auto" ref="myChart"></canvas>
-        <v-range-slider step="0.2" v-model="sliderValue" class="px-[1em]" color="blue-grey-lighten-4"></v-range-slider>
-        <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨':''}`" class="ml-4"
-            :color="enableAnimation?'orange':''" hide-details inset></v-switch>
+        <v-range-slider step="0.1" v-model="sliderValue" class="px-[1em]" color="blue-grey-lighten-4"></v-range-slider>
+        <div class="grid grid-cols-2">
+            <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨' : ''}`" class="ml-4"
+                :color="enableAnimation ? 'orange' : ''" hide-details inset></v-switch>
+            <v-number-input class="" label="max labels count" v-model="maxLabelsCount" :min="1"
+                variant="outlined"></v-number-input>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeMount,watch, computed } from 'vue'
-import { Chart as ChartJS } from 'chart.js/auto';
+import { Chart as ChartJS, Interaction } from 'chart.js/auto';
 import { zhTW } from 'date-fns/locale';
 import 'chartjs-adapter-date-fns';
+// import { Interaction } from 'chart.js';
+import { getRelativePosition } from 'chart.js/helpers';
 
 
 let chart;
 let timeRange;
 const sliderValue = ref([0, 100])
 const myChart = ref(null);
+const maxLabelsCount = ref(10)
 
 const enableAnimation = ref(false)
 
@@ -35,19 +42,35 @@ onMounted(() => {
 
 watch(sliderValue, () => {
     if (Math.abs(sliderValue.value[0] - sliderValue.value[1]) > 0.2)
-    updateChartRange();
+        updateChartRange();
+})
+
+watch(maxLabelsCount, () => {
+    chart.update()
 })
 
 watch(enableAnimation, (value) => {
     toggleAnimation(value);
 })
 
+Interaction.modes.myCustomMode = function (chart, e, options, useFinalPosition) {
+    const position = getRelativePosition(e, chart);
+    const items = [];
+    Interaction.evaluateInteractionItems(chart, 'x', position, (element, datasetIndex, index) => {
+        if (element.x <= position.x && datasetIndex < maxLabelsCount.value) {
+            items[datasetIndex] = { element, datasetIndex, index };
+        }
+    });
+    items.sort((a, b) => a.element.y - b.element.y )
+    return items.filter(e => e !== null && e.element.y !== 0)
+};
+
 const options = {
     animation:false,
     parsing:false,
     normalized: true,
     interaction: {
-        mode: 'nearest',
+        mode: 'myCustomMode',
         axis: 'x',
         intersect: false
     },
@@ -59,7 +82,12 @@ const options = {
             algorithm: 'lttb',
         },
         legend: {
-            display:false
+            position:'chartArea',
+            labels: {
+                filter: function (label) {
+                    return label.datasetIndex < maxLabelsCount.value;
+                }
+            }
         },
     },
     scales: {
@@ -110,7 +138,6 @@ function updateDatasetsTimeRange() {
 
 function setDatasets(dataset) {
     chart.data.datasets = dataset
-    chart.update()
     updateDatasetsTimeRange();
     updateChartRange();
 }

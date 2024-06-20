@@ -2,7 +2,7 @@
     <div v-if="loaded">
         <LineChartPage :messages="messages" :externalData="externalData" v-if="isLineChart"></LineChartPage>
         <PieChartPage :messages="messages" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
-        <div class="absolute right-10 bottom-10">
+        <div class="fixed right-4 bottom-4">
             <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'"
                 size="x-large" color="primary" @click="toggleChartType()"></v-btn>
         </div>

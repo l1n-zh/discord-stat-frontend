@@ -36,7 +36,7 @@
                 </v-btn>
             </v-btn-toggle>
 
-            <v-btn @click="submit()" append-icon="mdi-chart-pie" color="secondary" class="float-right m-auto"
+            <v-btn @click="submit()" append-icon="mdi-chart-pie" color="secondary" class="float-right"
                 size="x-large">submit</v-btn>
         </div>
     </div>

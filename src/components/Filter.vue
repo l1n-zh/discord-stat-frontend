@@ -1,13 +1,14 @@
 <template>
-    <v-select v-model="selected" :items="displayedItems" :label="label" :item-props="itemProps" multiple clearable>
+    <v-select v-model="selected" :items="displayedItems" :label="label" :item-props="itemProps" multiple clearable
+        density="comfortable" variant="outlined">
         <template v-slot:prepend-item>
             <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined"
                 @blur="() => { search = '' }" class="mx-3" hide-details single-line clearable></v-text-field>
 
             <v-list-item title="Select All" @click="toggle" v-if="displayedItems.length" class="mt-2" clearable>
                 <template v-slot:prepend>
-                    <v-checkbox-btn color="grey-darken-1"
-                        :indeterminate="haveSelected && !selectAll" :model-value="selectAll"></v-checkbox-btn>
+                    <v-checkbox-btn color="grey-darken-1" :indeterminate="haveSelected && !selectAll"
+                        :model-value="selectAll"></v-checkbox-btn>
                 </template>
             </v-list-item>
             <v-divider class="mb-2"></v-divider>
