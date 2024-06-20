@@ -3,14 +3,14 @@
         <PieChart ref="chart"></PieChart>
         <div class="lg:w-[60%] w-[95%]">
             <Filter label="channel" :items="externalData.channels" :filter="ChannelIdFilter"
-                :callback="filterInstance => channelIdFilterInstance = filterInstance">
+                :callback="addFilter">
             </Filter>
 
             <Filter label="user" :items="externalData.users" :filter="AuthorFilter"
-                :callback="filterInstance => authorFilterInstance = filterInstance"></Filter>
+                :callback="addFilter"></Filter>
 
             <Filter label="time of day" :items="generate24HourArray()" :filter="TimeOfDayFilter"
-                :callback="filterInstance => timeOfDayFilterInstance = filterInstance"></Filter>
+                :callback="addFilter"></Filter>
 
 
             <v-btn-toggle v-model="baseOn" variant="outlined" divided class="block w-full">
@@ -49,13 +49,12 @@ import { ref, onMounted } from 'vue'
 import { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter } from '@/components/filter'
 import { generate24HourArray } from '../utils.js'
 
-
-let channelIdFilterInstance, authorFilterInstance, timeOfDayFilterInstance; // TODO
-
-const { rawData, externalData } = defineProps(['rawData', 'externalData'])
+const { messages, externalData } = defineProps(['messages', 'externalData'])
 
 const chart = ref(null)
 const baseOn = ref(0)
+let filters = []
+const addFilter = filter => filters.push(filter)
 
 onMounted(() => {
     submit()
@@ -120,7 +119,7 @@ function sort(arr1, arr2) {
 
 function getData() {
     const baseOnFunction = [baseOnChannel, baseOnAuthor, baseOnDayOfTime][baseOn.value]
-    return baseOnFunction(query(rawData, [channelIdFilterInstance], [authorFilterInstance, timeOfDayFilterInstance]))
+    return baseOnFunction(query(messages, filters))
 }
 
 </script>

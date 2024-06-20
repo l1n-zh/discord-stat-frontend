@@ -1,7 +1,7 @@
 <template>
     <div v-if="loaded">
-        <LineChartPage :rawData="data" :externalData="externalData" v-if="isLineChart"></LineChartPage>
-        <PieChartPage :rawData="data" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
+        <LineChartPage :messages="messages" :externalData="externalData" v-if="isLineChart"></LineChartPage>
+        <PieChartPage :messages="messages" :externalData="externalData" v-if="!isLineChart"></PieChartPage>
         <div class="absolute right-10 bottom-10">
             <v-btn density="compact" :icon="isLineChart ? 'mdi-chart-pie':'mdi-chart-timeline-variant-shimmer'"
                 size="x-large" color="primary" @click="toggleChartType()"></v-btn>
@@ -16,14 +16,14 @@ import PieChartPage from './page/PieChartPage.vue'
 import { ref, onMounted } from 'vue'
 import { snowflakeToDate } from './utils'
 
-let data = [], externalData;
+let messages = [], externalData;
 
 const loaded = ref(false)
 const isLineChart = ref(true);
 const toggleChartType = () => {isLineChart.value = !isLineChart.value}
 
 onMounted(async () => {
-    data = await fetch('/assets/data.json')
+    const data = await fetch('/assets/data.json')
         .then(response => response.json())
         .catch(error => {
             console.error('Error fetching data:', error);
@@ -33,6 +33,7 @@ onMounted(async () => {
         for (let message of channelData.messages) {
             message.time = snowflakeToDate(message.id)
             message.channelId = channelId
+            messages.push(message)
         }
     }
 
