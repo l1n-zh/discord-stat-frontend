@@ -10,6 +10,7 @@
         "deploy": "vite build --base /discord-stat-frontend/;gh-pages -d dist"
     },
     "dependencies": {
+        "@amcharts/amcharts5": "^5.9.12",
         "chart.js": "^4.4.3",
         "chart.js-plugin-labels-dv": "^5.0.1-beta",
         "chartjs-adapter-date-fns": "^3.0.0",
