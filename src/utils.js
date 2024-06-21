@@ -19,4 +19,21 @@ function snowflakeToDate(snowflake) {
     return dateBits + 1420070400000;
 }
 
-export { generate24HourArray, snowflakeToDate };
+function truncateString(str, maxLength) {
+     let len = 0;
+     let truncated = "";
+
+     for (let char of str) {
+         len += char.match(/[^\x00-\xff]/) ? 2:1
+         if (len <= maxLength) {
+             truncated += char;
+         } else {
+             truncated += "...";
+             break;
+         }
+     }
+
+     return truncated;
+}
+
+export { generate24HourArray, snowflakeToDate, truncateString };

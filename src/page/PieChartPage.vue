@@ -47,7 +47,7 @@ import PieChart from '@/components/chart/PieChart.vue'
 import Filter from '@/components/Filter.vue';
 import { ref, onMounted } from 'vue'
 import { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter } from '@/components/filter'
-import { generate24HourArray } from '../utils.js'
+import { generate24HourArray, truncateString } from '../utils.js'
 
 const { messages, externalData } = defineProps(['messages', 'externalData'])
 
@@ -92,7 +92,7 @@ function baseOnAuthor(messages) {
         const count = messages.filter(message => message.authorId === userData.value).length
         if (count > 0) {
             messageCounts.push(count)
-            labels.push(userData.title + ' ( ' + userData.subtitle + ' )')
+            labels.push(truncateString(userData.title, 15) + ' ( ' + userData.subtitle + ' )')
         }
     }
     return sort(labels, messageCounts);
@@ -105,7 +105,7 @@ function baseOnChannel(messages) {
         const count = messages.filter(message => message.channelId === channelData.value).length;
         if (count > 0) {
             messageCounts.push(count)
-            labels.push(channelData.title)
+            labels.push(truncateString(channelData.title, 15))
         }
     }
     return sort(labels, messageCounts);

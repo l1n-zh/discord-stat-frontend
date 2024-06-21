@@ -55,7 +55,7 @@ import LineChart from '@/components/chart/LineChart.vue'
 import Filter from '@/components/Filter.vue';
 import { ref, onMounted } from 'vue'
 import { query, ChannelIdFilter, AuthorFilter, TimeOfDayFilter } from '@/components/filter'
-import { generate24HourArray } from '../utils.js'
+import { generate24HourArray, truncateString } from '../utils.js'
 
 const { messages, externalData } = defineProps(['messages', 'externalData'])
 const chart = ref(null)
@@ -106,7 +106,7 @@ function getDatasets(labelMapping, extractDataKey) {
 function getTimeOfDayDatasets() {
     let labelMapping = {};
     for (let data of generate24HourArray()) {
-        labelMapping[data.value] = (data.title + ' ( ' + data.subtitle + ' )')
+        labelMapping[data.value] = (truncateString(data.title, 15) + ' ( ' + data.subtitle + ' )')
     }
     return getDatasets(labelMapping, message => new Date(message.time).getHours());
 }
@@ -114,7 +114,7 @@ function getTimeOfDayDatasets() {
 function getAuthorDatasets() {
     let labelMapping = {};
     for (let data of externalData.users) {
-        labelMapping[data.value] = (data.title + ' ( ' + data.subtitle + ' )')
+        labelMapping[data.value] = (truncateString(data.title, 15) + ' ( ' + data.subtitle + ' )')
     }
     return getDatasets(labelMapping, message => message.authorId);
 }
