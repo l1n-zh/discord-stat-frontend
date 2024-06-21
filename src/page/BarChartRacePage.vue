@@ -93,7 +93,7 @@ function getDatasets(labelMapping, extractDataKey) {
             break
         dataSets.push(
             {
-                label: labelMapping[dataKey],
+                label: dataKey in labelMapping ?labelMapping[dataKey]:'Unknown '+dataKey,
                 data: data,
             }
         )
