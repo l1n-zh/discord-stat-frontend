@@ -3,7 +3,8 @@
         density="comfortable" variant="outlined">
         <template v-slot:prepend-item>
             <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined"
-                @blur="() => { search = '' }" class="mx-3" hide-details single-line clearable></v-text-field>
+                v-click-outside="() => { search = '' }" class="mx-3" hide-details single-line
+                clearable></v-text-field>
 
             <v-list-item title="Select All" @click="toggle" v-if="displayedItems.length" class="mt-2" clearable>
                 <template v-slot:prepend>
