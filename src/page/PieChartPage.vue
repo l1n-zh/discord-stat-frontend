@@ -76,7 +76,7 @@ function baseOnDayOfTime(messages) {
     let messageCounts = [];
     let labels = [];
     for (let hourData of generate24HourArray()) {
-        const count = messages.filter(message => newDate(message.time).getHours() === hourData.value).length
+        const count = messages.filter(message => new Date(message.time).getHours() === hourData.value).length
         if (count > 0) {
             messageCounts.push(count)
             labels.push(hourData.title + ' (' + hourData.subtitle + ')')
