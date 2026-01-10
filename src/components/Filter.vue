@@ -1,6 +1,6 @@
 <template>
     <v-select v-model="selected" :items="displayedItems" :label="label" :item-props="itemProps" multiple clearable
-        density="comfortable" variant="outlined">
+        density="comfortable" variant="outlined" class="w-full">
         <template v-slot:prepend-item>
             <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined"
                 v-click-outside="() => { search = '' }" class="mx-3" hide-details single-line
