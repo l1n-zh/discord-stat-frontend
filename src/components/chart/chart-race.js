@@ -256,9 +256,8 @@ function _updateChart(self, timeIndex, animationEnable) {
             (self.indexRange.start > 0
                 ? self.values[datasetIndex][self.indexRange.start - 1]
                 : 0);
-        if (value === 0) return;
 
-        if (!animationEnable) {
+        if (!animationEnable || value === 0) {
             dataItem.set("valueX", value);
             dataItem.set("valueXWorking", value);
         } else {
