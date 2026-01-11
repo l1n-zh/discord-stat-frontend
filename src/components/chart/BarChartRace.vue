@@ -117,7 +117,7 @@ function setDatasets(datasets, topN) {
     // 更新初始進度條位置到起始位置
     // 使用 nextTick 確保 update 函數執行完成後再更新
     nextTick(() => {
-        if (chart && chart.indexRange) {
+        if (chart.indexRange) {
             isUpdatingFromCallback.value = true;
             timeRangeSelector.value = 0;
             playing.value = false;

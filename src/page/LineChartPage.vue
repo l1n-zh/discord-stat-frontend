@@ -183,13 +183,13 @@ function getSumDatasets() {
 }
 
 function submit() {
-    const getDatasets = [
+    const fn = [
         getChannelDatasets,
         getAuthorDatasets,
         getTimeOfDayDatasets,
         getSumDatasets,
     ][baseOn.value];
-    dataCache = getDatasets();
+    dataCache = fn();
     chart.value.setDatasets(dataCache.slice(0, topN.value));
 }
 

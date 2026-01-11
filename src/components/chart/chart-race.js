@@ -114,16 +114,16 @@ function createChart(self) {
     });
 
     // Make each column to be of a different color
-    series.columns.template.adapters.add("fill", function (fill, target) {
+    series.columns.template.adapters.add("fill", (fill, target) => {
         return chart.get("colors").getIndex(series.columns.indexOf(target));
     });
 
-    series.columns.template.adapters.add("stroke", function (stroke, target) {
+    series.columns.template.adapters.add("stroke", (stroke, target) => {
         return chart.get("colors").getIndex(series.columns.indexOf(target));
     });
 
     // Add label bullet
-    series.bullets.push(function () {
+    series.bullets.push(() => {
         return Bullet.new(root, {
             locationX: 1,
             sprite: Label.new(root, {
@@ -157,7 +157,7 @@ function _startSortInterval(self) {
     if (self.sortInterval) {
         _clearSortInterval(self);
     }
-    self.sortInterval = setInterval(function () {
+    self.sortInterval = setInterval(() => {
         sortCategoryAxis(self, true);
     }, 50);
 }
@@ -178,7 +178,7 @@ function startAnimation(self) {
     }
 
     if (self.interval) clearInterval(self.interval);
-    self.interval = setInterval(function () {
+    self.interval = setInterval(() => {
         ++self.timeIndex;
         if (self.timeIndex > self.indexRange.end) {
             _clearInterval(self);
@@ -198,10 +198,8 @@ function startAnimation(self) {
 }
 
 function _clearAnimations(self) {
-    console.log("clearAnimations");
     if (self.activeAnimations) {
-        self.activeAnimations.forEach(function (animation) {
-            console.log("DEBUG:", "stopping animation", animation);
+        self.activeAnimations.forEach((animation) => {
             if (animation) {
                 animation.stop();
             }
@@ -218,7 +216,6 @@ function _clearInterval(self) {
 function _clearSortInterval(self) {
     clearInterval(self.sortInterval);
     self.sortInterval = null;
-    console.log("clearSortInterval");
 }
 
 function stopAnimation(self) {
@@ -237,7 +234,7 @@ function _updateChart(self, timeIndex, animationEnable) {
 
     // 清理已完成的動畫引用（只保留正在進行的）
     if (self.activeAnimations) {
-        self.activeAnimations = self.activeAnimations.filter(function (anim) {
+        self.activeAnimations = self.activeAnimations.filter((anim) => {
             return anim && !anim.isFinished && !anim.isKilled;
         });
     }
@@ -252,7 +249,7 @@ function _updateChart(self, timeIndex, animationEnable) {
      * 可考慮只更新 maxRow 的數量就好
      * 節省計算資源，缺點是如果用戶將圖表向下捲動，會看到空白
      */
-    array.each(self.series.dataItems, function (dataItem) {
+    array.each(self.series.dataItems, (dataItem) => {
         let datasetIndex = dataItem.dataContext["datasetIndex"];
         let value =
             self.values[datasetIndex][timeIndex] -
@@ -295,15 +292,14 @@ function getSeriesItem(self, datasetIndex) {
 
 function sortCategoryAxis(self, animationEnable) {
     const series = self.series;
-    console.log("DEBUG:", "sorting category axis");
 
     // sort by value
-    series.dataItems.sort(function (x, y) {
+    series.dataItems.sort((x, y) => {
         return y.get("valueX") - x.get("valueX"); // descending
     });
 
     // go through each axis item
-    array.each(self.yAxis.dataItems, function (dataItem) {
+    array.each(self.yAxis.dataItems, (dataItem) => {
         // get corresponding series item
         let seriesDataItem = getSeriesItem(
             self,
@@ -315,7 +311,6 @@ function sortCategoryAxis(self, animationEnable) {
             const index = series.dataItems.indexOf(seriesDataItem);
             let currentIndex = dataItem.get("index");
             if (currentIndex === undefined) {
-                console.log("currentIndex is undefined");
                 currentIndex = self.yAxis.dataItems.indexOf(dataItem);
                 dataItem.set("index", currentIndex);
             }
@@ -343,7 +338,7 @@ function sortCategoryAxis(self, animationEnable) {
     });
     // sort axis items by index.
     // This changes the order instantly, but as deltaPosition is set, they keep in the same places and then animate to true positions.
-    self.yAxis.dataItems.sort(function (x, y) {
+    self.yAxis.dataItems.sort((x, y) => {
         return x.get("index") - y.get("index");
     });
 }
@@ -392,7 +387,7 @@ function update(self, datasets, config) {
     }
     self.values = values;
 
-    ready(function () {
+    ready(() => {
         for (const [index, dataset] of datasets.entries()) {
             self.series.data.push({
                 label: dataset.label,

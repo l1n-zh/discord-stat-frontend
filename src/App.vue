@@ -1,6 +1,5 @@
 <template>
     <div v-if="loaded">
-        <!-- TODO: page switch for BarChartRace -->
         <LineChartPage
             :messages="messages"
             :externalData="externalData"

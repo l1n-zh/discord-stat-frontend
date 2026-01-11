@@ -141,12 +141,12 @@ function submit() {
     });
 }
 
-function baseOnDayOfTime(messages) {
+function baseOnDayOfTime(messageData) {
     let messageCounts = [];
     let labels = [];
     for (let hourData of generate24HourArray()) {
-        const count = messages.filter(
-            (message) => new Date(message.time).getHours() === hourData.value
+        const count = messageData.filter(
+            (msg) => new Date(msg.time).getHours() === hourData.value
         ).length;
         if (count > 0) {
             messageCounts.push(count);
@@ -156,12 +156,12 @@ function baseOnDayOfTime(messages) {
     return [labels, messageCounts];
 }
 
-function baseOnAuthor(messages) {
+function baseOnAuthor(messageData) {
     let messageCounts = [];
     let labels = [];
     for (let userData of externalData.users) {
-        const count = messages.filter(
-            (message) => message.authorId === userData.value
+        const count = messageData.filter(
+            (msg) => msg.authorId === userData.value
         ).length;
         if (count > 0) {
             messageCounts.push(count);
@@ -176,12 +176,12 @@ function baseOnAuthor(messages) {
     return sort(labels, messageCounts);
 }
 
-function baseOnChannel(messages) {
+function baseOnChannel(messageData) {
     let messageCounts = [];
     let labels = [];
     for (let channelData of externalData.channels) {
-        const count = messages.filter(
-            (message) => message.channelId === channelData.value
+        const count = messageData.filter(
+            (msg) => msg.channelId === channelData.value
         ).length;
         if (count > 0) {
             messageCounts.push(count);
