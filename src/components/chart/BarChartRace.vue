@@ -4,7 +4,7 @@
             fullScreen
                 ? 'w-screen h-screen z-10 bg-white'
                 : 'lg:w-[50vw] w-[95vw] h-[50vh]',
-            'relative',
+            'relative touch-pan-y',
         ]"
     >
         <div
@@ -15,7 +15,7 @@
         <div
             :class="[fullScreen ? '' : '!opacity-100', 'control-bar bg-black']"
         >
-            <div class="w-full absolute top-[-16px] left-0">
+            <div class="w-full absolute top-[-16px] left-0 touch-none">
                 <v-slider
                     v-model="timeRangeSelector"
                     color="red"
