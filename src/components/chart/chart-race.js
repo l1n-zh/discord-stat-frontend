@@ -404,7 +404,6 @@ function update(self, datasets, config) {
         self.series.appear(1000);
         self.chart.appear(1000, 100);
 
-        _startSortInterval(self);
     });
 }
 
@@ -498,11 +497,13 @@ function setTimeIndex(self, index) {
 
     if (wasPlaying) {
         _clearInterval(self);
+        _clearSortInterval(self);
         _clearAnimations(self);
     }
 
     self.timeIndex = index;
     _updateChart(self, index, false);
+    sortCategoryAxis(self, false);
 
     if (wasPlaying) {
         startAnimation(self);
