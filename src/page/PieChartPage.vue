@@ -2,6 +2,13 @@
     <div class="flex items-center flex-col lg:flex-row">
         <PieChart ref="chart"></PieChart>
         <div class="lg:w-[60%] w-[95%]">
+            <v-number-input
+                label="TOP N"
+                v-model="topN"
+                :min="1"
+                variant="outlined"
+            ></v-number-input>
+
             <Filter
                 label="channel"
                 :items="externalData.channels"
@@ -25,37 +32,36 @@
             ></Filter>
 
             <div class="flex sm:flex-row flex-col gap-2">
+                <v-btn-toggle
+                    v-model="baseOn"
+                    variant="outlined"
+                    divided
+                    class="block w-full"
+                >
+                    <v-btn :value="0">
+                        <v-icon start> mdi-forum </v-icon>
+                        <span class="hidden-sm-and-down">Channel</span>
+                    </v-btn>
 
-            <v-btn-toggle
-                v-model="baseOn"
-                variant="outlined"
-                divided
-                class="block w-full"
-            >
-                <v-btn :value="0">
-                    <v-icon start> mdi-forum </v-icon>
-                    <span class="hidden-sm-and-down">Channel</span>
-                </v-btn>
+                    <v-btn :value="1">
+                        <v-icon start> mdi-account </v-icon>
+                        <span class="hidden-sm-and-down">User</span>
+                    </v-btn>
 
-                <v-btn :value="1">
-                    <v-icon start> mdi-account </v-icon>
-                    <span class="hidden-sm-and-down">User</span>
-                </v-btn>
+                    <v-btn :value="2">
+                        <v-icon start> mdi-clock </v-icon>
+                        <span class="hidden-sm-and-down">Time Of Day</span>
+                    </v-btn>
+                </v-btn-toggle>
 
-                <v-btn :value="2">
-                    <v-icon start> mdi-clock </v-icon>
-                    <span class="hidden-sm-and-down">Time Of Day</span>
-                </v-btn>
-            </v-btn-toggle>
-
-            <v-btn
-                @click="submit()"
-                append-icon="mdi-chart-pie"
-                color="secondary"
-                class="float-right w-full sm:w-auto"
-                size="x-large"
-                >submit</v-btn
-            >
+                <v-btn
+                    @click="submit()"
+                    append-icon="mdi-chart-pie"
+                    color="secondary"
+                    class="float-right w-full sm:w-auto"
+                    size="x-large"
+                    >submit</v-btn
+                >
             </div>
         </div>
     </div>
@@ -64,7 +70,7 @@
 <script setup>
 import PieChart from "@/components/chart/PieChart.vue";
 import Filter from "@/components/Filter.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import {
     query,
     ChannelIdFilter,
@@ -80,19 +86,56 @@ const baseOn = ref(0);
 let filters = {};
 const addFilter = (filter) => (filters[filter.name] = filter);
 
+const topN = ref(20);
+let dataCache;
+
 onMounted(() => {
     submit();
 });
 
+watch(topN, () => {
+    if (dataCache && baseOn.value !== 2) {
+        const [labels, data] = dataCache;
+        const [processedLabels, processedData] = applyTopN(
+            labels,
+            data,
+            topN.value
+        );
+        chart.value.setData({
+            labels: processedLabels,
+            datasets: [
+                {
+                    label: "message count",
+                    data: processedData,
+                },
+            ],
+        });
+    }
+});
+
 function submit() {
     const [labels, data] = getData();
+    dataCache = [labels, data];
+    
+    let processedLabels, processedData;
+    if (baseOn.value === 2) {
+        // Time Of Day 不使用 TopN
+        processedLabels = labels;
+        processedData = data;
+    } else {
+        [processedLabels, processedData] = applyTopN(
+            labels,
+            data,
+            topN.value
+        );
+    }
 
     chart.value.setData({
-        labels: labels,
+        labels: processedLabels,
         datasets: [
             {
                 label: "message count",
-                data: data,
+                data: processedData,
             },
         ],
     });
@@ -159,5 +202,23 @@ function getData() {
         baseOn.value
     ];
     return baseOnFunction(query(messages, Object.values(filters)));
+}
+
+function applyTopN(labels, data, n) {
+    if (labels.length <= n) {
+        return [labels, data];
+    }
+
+    const topLabels = labels.slice(0, n);
+    const topData = data.slice(0, n);
+    const remainingData = data.slice(n);
+    const remainingSum = remainingData.reduce((sum, val) => sum + val, 0);
+
+    if (remainingSum > 0) {
+        topLabels.push("其他");
+        topData.push(remainingSum);
+    }
+
+    return [topLabels, topData];
 }
 </script>
