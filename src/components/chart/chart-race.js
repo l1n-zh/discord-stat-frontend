@@ -7,7 +7,6 @@ import {
     p100,
     p50,
     array,
-    Scrollbar,
 } from "@amcharts/amcharts5/index";
 import {
     ColumnSeries,
@@ -47,6 +46,10 @@ function getTimeRange(datasets) {
 }
 
 function createChart(self) {
+    self.timeIndex = null;
+    self.activeAnimations = [];
+    self.onTimeIndexChange = null;
+
     const root = self.root;
     root.container.children.clear();
     const chart = root.container.children.push(
@@ -143,16 +146,6 @@ function createChart(self) {
         })
     );
 
-    const scrollbar = Scrollbar.new(self.root, {
-        orientation: "horizontal",
-    });
-
-    scrollbar.events.on("rangechanged", (ev) => {
-        updateRange(self, { start: ev.start, end: ev.end });
-    });
-
-    self.root.container.children.push(scrollbar);
-
     self.chart = chart;
     self.yAxis = yAxis;
     self.xAxis = xAxis;
@@ -160,32 +153,92 @@ function createChart(self) {
     self.label = label;
 }
 
-function startAnimation(self) {
-    let timeIndex = self.indexRange.start;
-    updateChart(self, timeIndex, false);
-    updateChart(self, ++timeIndex, true);
-
-    self.interval = setInterval(function () {
-        ++timeIndex;
-        if (timeIndex > self.indexRange.end) {
-            stopAnimation(self);
-        } else {
-            updateChart(self, timeIndex, true);
-        }
-    }, self.options.stepDuration);
-
+function _startSortInterval(self) {
+    if (self.sortInterval) {
+        _clearSortInterval(self);
+    }
     self.sortInterval = setInterval(function () {
         sortCategoryAxis(self, true);
     }, 50);
 }
 
-function stopAnimation(self) {
-    clearInterval(self.interval);
-    clearInterval(self.sortInterval);
+function startAnimation(self) {
+    if (self.timeIndex == null) {
+        self.timeIndex = self.indexRange.start;
+        _updateChart(self, self.timeIndex, false);
+    }
+
+    if (!self.config.speed) {
+        self.config.speed = 1;
+    }
+    self.stepDuration = self.config.baseStepDuration / self.config.speed;
+
+    if (self.timeIndex < self.indexRange.end) {
+        _updateChart(self, ++self.timeIndex, true);
+    }
+
+    if (self.interval) clearInterval(self.interval);
+    self.interval = setInterval(function () {
+        ++self.timeIndex;
+        if (self.timeIndex > self.indexRange.end) {
+            _clearInterval(self);
+            _clearSortInterval(self);
+            self.timeIndex = null;
+            // TODO: ending callback
+        } else {
+            _updateChart(self, self.timeIndex, true);
+        }
+    }, self.stepDuration);
+
+    if (!self.sortInterval) {
+        _startSortInterval(self);
+    }
 }
 
-function updateChart(self, timeIndex, animationEnable) {
-    const { stepDuration, timeDuration, maxRow, timeFormatter } = self.options;
+function _clearAnimations(self) {
+    console.log("clearAnimations");
+    if (self.activeAnimations) {
+        self.activeAnimations.forEach(function (animation) {
+            console.log("DEBUG:", "stopping animation", animation);
+            if (animation) {
+                animation.stop();
+            }
+        });
+        self.activeAnimations = [];
+    }
+}
+
+function _clearInterval(self) {
+    clearInterval(self.interval);
+    self.interval = null;
+}
+
+function _clearSortInterval(self) {
+    clearInterval(self.sortInterval);
+    self.sortInterval = null;
+    console.log("clearSortInterval");
+}
+
+function stopAnimation(self) {
+    // DO NOT clear sortInterval!
+    _clearInterval(self);
+    _clearAnimations(self);
+}
+
+function _updateChart(self, timeIndex, animationEnable) {
+    /*
+     * 會有使用 self.timeIndex 以外的場合
+     * 如: _updateChart(self, self.timeIndex, true);
+     * 因此需要 timeIndex 參數
+     */
+    const { timeDuration, maxRow, timeFormatter } = self.config;
+
+    // 清理已完成的動畫引用（只保留正在進行的）
+    if (self.activeAnimations) {
+        self.activeAnimations = self.activeAnimations.filter(function (anim) {
+            return anim && !anim.isFinished && !anim.isKilled;
+        });
+    }
 
     self.label.set(
         "text",
@@ -194,6 +247,8 @@ function updateChart(self, timeIndex, animationEnable) {
         )} ~ ${timeFormatter(self.timeRange.start + timeIndex * timeDuration)}`
     );
     let itemsWithNonZero = 0;
+    // TODO: 只要更新 MaxRow 的數量就好
+    // TODO: itemsWithNonZero 不用重複計算
     array.each(self.series.dataItems, function (dataItem) {
         let datasetIndex = dataItem.dataContext["datasetIndex"];
         let value =
@@ -207,25 +262,33 @@ function updateChart(self, timeIndex, animationEnable) {
             dataItem.set("valueX", value);
             dataItem.set("valueXWorking", value);
         } else {
-            dataItem.animate({
+            const anim1 = dataItem.animate({
                 key: "valueX",
                 to: value,
-                duration: stepDuration,
+                duration: self.stepDuration,
                 easing: ease.linear,
             });
-            dataItem.animate({
+            const anim2 = dataItem.animate({
                 key: "valueXWorking",
                 to: value,
-                duration: stepDuration,
+                duration: self.stepDuration,
                 easing: ease.linear,
             });
+            if (anim1) self.activeAnimations.push(anim1);
+            if (anim2) self.activeAnimations.push(anim2);
         }
     });
-    sortCategoryAxis(self, animationEnable);
+    // Don't need to call sortCategoryAxis here, it will be called periodically by setInterval.
 
-    self.yAxis.zoom(0, Math.min(itemsWithNonZero, maxRow) / self.yAxis.dataItems.length);
+    self.yAxis.zoom(
+        0,
+        Math.min(itemsWithNonZero, maxRow) / self.yAxis.dataItems.length
+    );
+
+    if (self.onTimeIndexChange) {
+        self.onTimeIndexChange(timeIndex, self.indexRange);
+    }
 }
-
 
 function getSeriesItem(self, datasetIndex) {
     return self.series.dataItems.find(
@@ -235,6 +298,7 @@ function getSeriesItem(self, datasetIndex) {
 
 function sortCategoryAxis(self, animationEnable) {
     const series = self.series;
+    console.log("DEBUG:", "sorting category axis");
 
     // sort by value
     series.dataItems.sort(function (x, y) {
@@ -251,12 +315,18 @@ function sortCategoryAxis(self, animationEnable) {
 
         if (seriesDataItem) {
             // get index of series data item
-            let index = series.dataItems.indexOf(seriesDataItem);
+            const index = series.dataItems.indexOf(seriesDataItem);
+            let currentIndex = dataItem.get("index");
+            if (currentIndex === undefined) {
+                console.log("currentIndex is undefined");
+                currentIndex = self.yAxis.dataItems.indexOf(dataItem);
+                dataItem.set("index", currentIndex);
+            }
             // calculate delta position
             let deltaPosition =
-                (index - dataItem.get("index", 0)) / series.dataItems.length;
+                (index - currentIndex) / series.dataItems.length;
             // set index to be the same as series data item index
-            if (dataItem.get("index") != index) {
+            if (currentIndex != index) {
                 dataItem.set("index", index);
                 // set deltaPosition instanlty
                 dataItem.set("deltaPosition", -deltaPosition);
@@ -281,16 +351,20 @@ function sortCategoryAxis(self, animationEnable) {
     });
 }
 
-function update(self, datasets, options) {
-    self.options = options;
+function update(self, datasets, config) {
+    self.config = config;
+
+    self.config.baseStepDuration = config.baseStepDuration;
+    self.datasets = datasets; // 保存 datasets 以供後續使用
     createChart(self);
-    stopAnimation(self);
+    _clearInterval(self);
+    _clearSortInterval(self);
 
     const timeRange = getTimeRange(datasets);
     self.indexRange = {
         start: 0,
         end: Math.floor(
-            (timeRange.end - timeRange.start) / options.timeDuration
+            (timeRange.end - timeRange.start) / config.timeDuration
         ),
     };
     self.timeRange = timeRange;
@@ -303,7 +377,7 @@ function update(self, datasets, options) {
             values[index][
                 Math.floor(
                     (dataset.data[i].x - self.timeRange.start) /
-                        options.timeDuration
+                        config.timeDuration
                 )
             ] = dataset.data[i].y;
         }
@@ -333,27 +407,131 @@ function update(self, datasets, options) {
                 datasetIndex: index,
             });
         }
-        updateChart(self, self.indexRange.end, false);
+        // 設置初始 timeIndex 為結束位置（顯示最終狀態）
+        _updateChart(self, self.indexRange.end, false);
         self.series.appear(1000);
         self.chart.appear(1000, 100);
+
+        _startSortInterval(self);
     });
 }
 
-function updateRange(self, range) {
-    const indexCount = Math.floor(
-        (self.timeRange.end - self.timeRange.start) / self.options.timeDuration
-    );
-    self.indexRange = {
-        start: Math.floor(range.start * indexCount),
-        end: Math.floor(range.end * indexCount),
-    };
-    stopAnimation(self);
-    updateChart(self, self.indexRange.end);
-}
-
-function setMaxRow(self, n) { 
-    if (!n || n <= 0) return;
+function setMaxRow(self, n) {
+    self.config.maxRow = n;
     self.yAxis.zoom(0, n / self.yAxis.dataItems.length);
 }
 
-export { update, updateRange, stopAnimation, startAnimation, setMaxRow };
+function setSpeed(self, speed) {
+    self.config.speed = speed;
+
+    // 如果正在播放，重新啟動 interval
+    if (self.interval) {
+        const currentIndex = self.timeIndex;
+
+    //     // DO NOT clear sortInterval!
+        _clearInterval(self);
+
+        _clearAnimations(self);
+        self.timeIndex = currentIndex - 1;
+        startAnimation(self);
+    }
+}
+
+function recalculateValues(self, datasets) {
+    const timeRange = self.timeRange;
+    const timeDuration = self.config.timeDuration;
+
+    self.indexRange = {
+        start: 0,
+        end: Math.floor((timeRange.end - timeRange.start) / timeDuration),
+    };
+
+    let values = [];
+
+    for (const [index, dataset] of datasets.entries()) {
+        values[index] = [];
+        for (let i = 0; i < dataset.data.length; ++i) {
+            values[index][
+                Math.floor((dataset.data[i].x - timeRange.start) / timeDuration)
+            ] = dataset.data[i].y;
+        }
+        fillEmpty(values[index], self.indexRange.end + 1);
+    }
+
+    function fillEmpty(arr, n) {
+        let lastValue = 0;
+        for (let i = 0; i < n; ++i) {
+            if (arr[i] === undefined) arr[i] = lastValue;
+            else {
+                lastValue = arr[i];
+            }
+        }
+    }
+
+    self.values = values;
+}
+
+function setTimeDuration(self, duration, baseStepDuration) {
+    const wasPlaying = self.interval !== null;
+
+    self.config.timeDuration = duration;
+    if (baseStepDuration) {
+        self.config.baseStepDuration = baseStepDuration;
+    }
+
+    // 重新計算資料結構
+    if (self.datasets && self.timeRange) {
+        const indexRatio = self.timeIndex / self.indexRange.end;
+        recalculateValues(self, self.datasets);
+        if (self.timeIndex !== null) {
+            self.timeIndex = Math.round(indexRatio * self.indexRange.end);
+            _updateChart(self, self.timeIndex, false);
+
+            if (wasPlaying) {
+                startAnimation(self);
+            }
+        }
+    }
+}
+
+function setTimeIndex(self, index) {
+    if (index === null || index === undefined) return;
+
+    // 驗證 index 範圍
+    index = Math.max(
+        self.indexRange.start,
+        Math.min(index, self.indexRange.end)
+    );
+
+    const wasPlaying = self.interval !== null;
+
+    // 停止當前動畫
+    if (wasPlaying) {
+        _clearInterval(self);
+        _clearAnimations(self);
+    }
+
+    // 立即更新到指定位置
+    self.timeIndex = index;
+    _updateChart(self, index, false);
+
+    // 如果之前正在播放，從新位置繼續播放
+    if (wasPlaying) {
+        startAnimation(self);
+    }
+}
+
+function setOnTimeIndexChange(self, callback) {
+    self.onTimeIndexChange = callback;
+}
+
+export {
+    update,
+    stopAnimation,
+    startAnimation,
+    setMaxRow,
+    setSpeed,
+    setTimeDuration,
+    setTimeIndex,
+    setOnTimeIndexChange,
+};
