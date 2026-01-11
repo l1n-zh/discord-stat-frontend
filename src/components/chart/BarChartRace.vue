@@ -16,13 +16,13 @@
             :class="[fullScreen ? '' : '!opacity-100', 'control-bar bg-black']"
         >
             <div class="w-full absolute top-[-16px] left-0">
-                <v-range-slider
+                <v-slider
                     v-model="timeRangeSelector"
                     color="red"
                     :min="0"
                     :max="100"
                     :step="1"
-                ></v-range-slider>
+                ></v-slider>
             </div>
             <v-btn
                 density="compact"
@@ -74,6 +74,7 @@ import {
     setTimeDuration,
     setTimeIndex,
     setOnTimeIndexChange,
+    setOnEnd,
 } from "./chart-race";
 import { format, toDate } from "date-fns";
 
@@ -82,7 +83,7 @@ const playing = ref(false);
 let chart;
 const speedSelector = ref("1x");
 const timeDurationSelector = ref("日");
-const timeRangeSelector = ref([0, 100]);
+const timeRangeSelector = ref(0);
 const isUpdatingFromCallback = ref(false);
 const SPEED_MAP = {
     "0.5x": 0.5,
@@ -118,7 +119,7 @@ function setDatasets(datasets, topN) {
     nextTick(() => {
         if (chart && chart.indexRange) {
             isUpdatingFromCallback.value = true;
-            timeRangeSelector.value = [0, 0];
+            timeRangeSelector.value = 0;
             playing.value = false;
             nextTick(() => {
                 isUpdatingFromCallback.value = false;
@@ -133,6 +134,10 @@ function setTopN(n) {
 
 onMounted(() => {
     chart = new Chart("chartdiv");
+
+    setOnEnd(chart, () => {
+        playing.value = false;
+    });
 });
 
 function togglePlay() {
@@ -146,13 +151,6 @@ function togglePlay() {
             
             const { start, end } = indexRange;
             
-            // 檢查動畫是否已結束
-            if (timeIndex > end) {
-                playing.value = false;
-                setOnTimeIndexChange(chart, null);
-                return;
-            }
-            
             const totalRange = end - start;
             const percentage = totalRange > 0 
                 ? ((timeIndex - start) / totalRange) * 100 
@@ -160,7 +158,7 @@ function togglePlay() {
             
             // 設置 flag 避免觸發 watch
             isUpdatingFromCallback.value = true;
-            timeRangeSelector.value = [0, Math.min(100, Math.max(0, percentage))];
+            timeRangeSelector.value = Math.min(100, Math.max(0, percentage));
             // 使用 nextTick 確保在 watch 執行後重置 flag
             nextTick(() => {
                 isUpdatingFromCallback.value = false;
@@ -188,22 +186,19 @@ watch(timeDurationSelector, (newDuration) => {
 // Watch timeRangeSelector
 watch(
     timeRangeSelector,
-    (newRange) => {
+    (percentage) => {
         // 如果正在從回調更新，跳過以避免循環
         if (isUpdatingFromCallback.value) {
             return;
         }
 
         // 將 slider 的百分比值轉換為實際的 timeIndex
-        // 使用範圍的結束值（newRange[1]）作為當前時間位置
         const { start, end } = chart.indexRange;
         const totalRange = end - start;
-        const percentage = Array.isArray(newRange) ? newRange[1] : newRange;
         const index = Math.floor(start + (percentage / 100) * totalRange);
 
         setTimeIndex(chart, index);
-    },
-    { deep: true }
+    }
 );
 
 defineExpose({ setDatasets, setTopN });

@@ -184,6 +184,9 @@ function startAnimation(self) {
             _clearInterval(self);
             _clearSortInterval(self);
             self.timeIndex = null;
+            if (self.onEnd) {
+                self.onEnd();
+            }
         } else {
             _updateChart(self, self.timeIndex, true);
         }
@@ -515,6 +518,10 @@ function setOnTimeIndexChange(self, callback) {
     self.onTimeIndexChange = callback;
 }
 
+function setOnEnd(self, callback) {
+    self.onEnd = callback;
+}
+
 export {
     update,
     stopAnimation,
@@ -524,4 +531,5 @@ export {
     setTimeDuration,
     setTimeIndex,
     setOnTimeIndexChange,
+    setOnEnd,
 };
