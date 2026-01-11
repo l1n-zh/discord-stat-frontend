@@ -46,7 +46,6 @@
                     :items="['日', '週', '月']"
                     label="步進時長"
                     density="compact"
-                    color="white"
                 ></v-select>
             </div>
             <v-btn
