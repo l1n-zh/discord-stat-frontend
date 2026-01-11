@@ -1,8 +1,6 @@
 <template>
     <div class="h-auto max-w-[90vh] w-full flex flex-col">
         <canvas class="w-full h-full m-auto" ref="myChart"></canvas>
-        <v-switch v-model="enableAnimation" :label="`Animation${enableAnimation ? '✨' : ''}`" class="ml-4"
-            :color="enableAnimation ? 'orange' : ''" hide-details inset></v-switch>
     </div>
 </template>
 
@@ -17,7 +15,6 @@ import 'chartjs-adapter-date-fns';
 let chart;
 const myChart = ref(null);
 
-const enableAnimation = ref(false)
 
 onMounted(() => {
     const ctx = myChart.value.getContext('2d');
@@ -30,10 +27,6 @@ onMounted(() => {
     chart.options = options;
     chart.update();
 });
-
-watch(enableAnimation, (value) => {
-    toggleAnimation(value);
-})
 
 const options = {
     animation: {
@@ -67,11 +60,6 @@ function addData(dataset) {
 
 function removeData(label) {
     // TODO
-}
-
-function toggleAnimation(value) {
-    chart.options.animation.animateRotate = value;
-    chart.options.animation.animateScale = value;
 }
 
 defineExpose({ addData, removeData, setData })

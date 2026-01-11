@@ -3,7 +3,7 @@
         :class="[
             fullScreen
                 ? 'w-screen h-screen z-10 bg-white'
-                : 'w-[50vw] h-[50vh]',
+                : 'lg:w-[50vw] w-[95vw] h-[50vh]',
             'relative',
         ]"
     >

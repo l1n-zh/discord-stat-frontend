@@ -31,7 +31,7 @@
                 :filter="TimeOfDayFilter"
                 :callback="addFilter"
             ></Filter>
-            <div class="md:flex">
+            <div class="flex sm:flex-row flex-col gap-2">
                 <v-btn-toggle
                     v-model="baseOn"
                     variant="outlined"
@@ -62,7 +62,7 @@
                     @click="submit()"
                     color="secondary"
                     append-icon="mdi-chart-timeline-variant-shimmer"
-                    class="ml-auto"
+                    class="ml-auto w-full sm:w-auto"
                     size="x-large"
                     >submit</v-btn
                 >

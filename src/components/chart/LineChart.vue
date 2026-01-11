@@ -7,16 +7,6 @@
             class="px-[1em]"
             color="blue-grey-lighten-4"
         ></v-range-slider>
-        <div class="grid grid-cols-2">
-            <v-switch
-                v-model="enableAnimation"
-                :label="`Animation${enableAnimation ? '✨' : ''}`"
-                class="ml-4"
-                :color="enableAnimation ? 'orange' : ''"
-                hide-details
-                inset
-            ></v-switch>
-        </div>
     </div>
 </template>
 
@@ -33,8 +23,6 @@ let timeRange;
 const sliderValue = ref([0, 100]);
 const myChart = ref(null);
 
-const enableAnimation = ref(false);
-
 onMounted(() => {
     const ctx = myChart.value.getContext("2d");
     chart = new ChartJS(ctx, {
@@ -49,10 +37,6 @@ onMounted(() => {
 watch(sliderValue, () => {
     if (Math.abs(sliderValue.value[0] - sliderValue.value[1]) > 0.2)
         updateChartRange();
-});
-
-watch(enableAnimation, (value) => {
-    toggleAnimation(value);
 });
 
 Interaction.modes.myCustomMode = function (
@@ -154,10 +138,6 @@ function updateChartRange() {
     chart.options.scales.x.min = from + unit * sliderValue.value[0];
     chart.options.scales.x.max = from + unit * sliderValue.value[1];
     chart.update();
-}
-
-function toggleAnimation(value) {
-    chart.options.animation = value;
 }
 
 defineExpose({ setDatasets });

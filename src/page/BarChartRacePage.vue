@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-center">
+    <div class="flex flex-col items-center gap-3">
         <BarChartRace ref="chart"></BarChartRace>
 
         <div class="lg:w-[60%] w-[95%]">
@@ -30,7 +30,7 @@
                 :filter="TimeOfDayFilter"
                 :callback="addFilter"
             ></Filter>
-            <div class="md:flex">
+            <div class="flex sm:flex-row flex-col gap-2">
                 <v-btn-toggle
                     v-model="baseOn"
                     variant="outlined"
@@ -61,7 +61,7 @@
                     @click="submit()"
                     color="secondary"
                     append-icon="mdi-poll"
-                    class="ml-auto"
+                    class="ml-auto w-full sm:w-auto"
                     size="x-large"
                     >submit</v-btn
                 >
