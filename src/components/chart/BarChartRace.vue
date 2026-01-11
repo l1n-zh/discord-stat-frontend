@@ -135,18 +135,12 @@ onMounted(() => {
     chart = new Chart("chartdiv");
 });
 
-function restart() {
-    stopAnimation(chart);
-    startAnimation(chart);
-}
-
 function togglePlay() {
     if (playing.value) {
         stopAnimation(chart);
         // 停止播放時清除回調
         setOnTimeIndexChange(chart, null);
     } else {
-        // 開始播放時註冊回調
         setOnTimeIndexChange(chart, (timeIndex, indexRange) => {
             if (!playing.value) return; // 如果已經停止播放，不更新
             

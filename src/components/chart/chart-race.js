@@ -184,7 +184,6 @@ function startAnimation(self) {
             _clearInterval(self);
             _clearSortInterval(self);
             self.timeIndex = null;
-            // TODO: ending callback
         } else {
             _updateChart(self, self.timeIndex, true);
         }
@@ -246,9 +245,10 @@ function _updateChart(self, timeIndex, animationEnable) {
             self.timeRange.start + self.indexRange.start * timeDuration
         )} ~ ${timeFormatter(self.timeRange.start + timeIndex * timeDuration)}`
     );
-    let itemsWithNonZero = 0;
-    // TODO: 只要更新 MaxRow 的數量就好
-    // TODO: itemsWithNonZero 不用重複計算
+    /**
+     * 可考慮只更新 maxRow 的數量就好
+     * 節省計算資源，缺點是如果用戶將圖表向下捲動，會看到空白
+     */
     array.each(self.series.dataItems, function (dataItem) {
         let datasetIndex = dataItem.dataContext["datasetIndex"];
         let value =
@@ -256,7 +256,7 @@ function _updateChart(self, timeIndex, animationEnable) {
             (self.indexRange.start > 0
                 ? self.values[datasetIndex][self.indexRange.start - 1]
                 : 0);
-        if (value > 0) ++itemsWithNonZero;
+        if (value === 0) return;
 
         if (!animationEnable) {
             dataItem.set("valueX", value);
@@ -279,11 +279,6 @@ function _updateChart(self, timeIndex, animationEnable) {
         }
     });
     // Don't need to call sortCategoryAxis here, it will be called periodically by setInterval.
-
-    self.yAxis.zoom(
-        0,
-        Math.min(itemsWithNonZero, maxRow) / self.yAxis.dataItems.length
-    );
 
     if (self.onTimeIndexChange) {
         self.onTimeIndexChange(timeIndex, self.indexRange);
@@ -497,7 +492,6 @@ function setTimeDuration(self, duration, baseStepDuration) {
 function setTimeIndex(self, index) {
     if (index === null || index === undefined) return;
 
-    // 驗證 index 範圍
     index = Math.max(
         self.indexRange.start,
         Math.min(index, self.indexRange.end)
@@ -505,17 +499,14 @@ function setTimeIndex(self, index) {
 
     const wasPlaying = self.interval !== null;
 
-    // 停止當前動畫
     if (wasPlaying) {
         _clearInterval(self);
         _clearAnimations(self);
     }
 
-    // 立即更新到指定位置
     self.timeIndex = index;
     _updateChart(self, index, false);
 
-    // 如果之前正在播放，從新位置繼續播放
     if (wasPlaying) {
         startAnimation(self);
     }
